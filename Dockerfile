@@ -28,6 +28,10 @@ RUN git submodule update --init --recursive
 # and install it
 RUN ./install.sh
 
+# get working version of s3lcd
+WORKDIR ./build/s3lcd
+RUN git checkout 1946749dc68789240480834083f3d779c1415f37
+
 # build correct version of micropython
 WORKDIR ./build/micropython/
 RUN git checkout v1.20.0
@@ -39,7 +43,7 @@ WORKDIR  ./build/micropython/ports/esp32
 # update the board definition for the T-Display-3 which has a 16MB octal SPIRAM 
 RUN sed -i 's/8MB=y/8MB=/' ./boards/GENERIC_S3_SPIRAM_OCT/sdkconfig.board
 RUN sed -i 's/16MB=/16MB=y/' ./boards/GENERIC_S3_SPIRAM_OCT/sdkconfig.board
-RUN sed -i 's/8MiB/16MiB/' ./boards/GENERIC_S3_SPIRAM_OCT/sdkconfig.board
+# RUN sed -i 's/8MiB/16MiB/' ./boards/GENERIC_S3_SPIRAM_OCT/sdkconfig.board
 
 # edit bashrc to ensure export.sh is always run for esp-idf
 RUN echo 'source /tmp/esp-idf/export.sh' >> /root/.bashrc
