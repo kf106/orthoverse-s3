@@ -10,6 +10,10 @@ RUN apt-get -y upgrade
 # install required packages
 RUN apt-get -y install build-essential libffi-dev git pkg-config cmake virtualenv python3-pip python3-virtualenv python3-libusb1 apt-utils
 
+# map current directory and build there
+ADD . /orthoverse-s3/
+WORKDIR /orthoverse-s3
+
 # clone repositories in build folder
 WORKDIR ./build
 RUN git clone https://github.com/micropython/micropython.git
@@ -36,10 +40,6 @@ WORKDIR  ./build/micropython/ports/esp32
 RUN sed -i 's/8MB=y/8MB=/' ./boards/GENERIC_S3_SPIRAM_OCT/sdkconfig.board
 RUN sed -i 's/16MB=/16MB=y/' ./boards/GENERIC_S3_SPIRAM_OCT/sdkconfig.board
 RUN sed -i 's/8MiB/16MiB/' ./boards/GENERIC_S3_SPIRAM_OCT/sdkconfig.board
-
-ADD . /orthoverse-s3/
-
-WORKDIR /orthoverse-s3
 
 # edit bashrc to ensure export.sh is always run for esp-idf
 RUN echo 'source /tmp/esp-idf/export.sh' >> /root/.bashrc

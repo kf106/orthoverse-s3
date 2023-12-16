@@ -41,15 +41,15 @@ def print_scr(text, fg, bg):
             )        
     tft.show()
 
-print_scr("Welcome to Orthoverse ESP32", s3lcd.WHITE, s3lcd.BLACK)
+print_scr("Welcome to DeadFellaz ESP32", s3lcd.WHITE, s3lcd.BLACK)
 
 
 
 
 print_scr("Checking WiFi connectivity...", s3lcd.WHITE, s3lcd.BLACK)
 
-ap_ssid = "orthoverse"
-ap_password = "orthoverse"
+ap_ssid = "DeadFellaz"
+ap_password = "undeadhorde"
 ap_authmode = 3  # WPA2-PSK
 
 NETWORK_PROFILES = 'wifi.dat'
@@ -340,7 +340,7 @@ if wlan is None:
         pass  # you shall not pass :D
 
 # Main Code goes here, wlan is a working network.WLAN(STA_IF) instance.
-print_scr("Connected succesfully to WiFi.", s3lcd.WHITE, s3lcd.BLUE)
+print_scr("Connected succesfully.", s3lcd.WHITE, s3lcd.BLUE)
 time.sleep(1)
 
 ###################################
@@ -377,7 +377,7 @@ def button_sleep(pause, image, front):
         global b
         if (buttons.right and buttons.right.value() == 0) and b == 0:
             b = 1
-            tft.png(image, 2, 2)
+            tft.png(front, 2, 2)
             tft.show()
         elif (buttons.right and buttons.right.value() == 1) and b == 1:
             b = 0
@@ -387,49 +387,54 @@ def button_sleep(pause, image, front):
 
 try:
     while True:
+        r = random.randint(1,10000)
 
-        # metadata = urequests.get(
-        #    url="https://blockchaingandalf.com/api/smallJSON"
-        # ).text
-        # obj = json.loads(metadata)
+        metadata = urequests.get(
+            url="https://blockchaingandalf.com/fellaz/" +
+            str(r) + 
+            ".json"
+        ).text
+        obj = json.loads(metadata)
 
-        # image = urequests.get(
-        #    url="https://blockchaingandalf.com/api/smallLand?img=" +
-        #    obj["tokenId"][2:] + 
-        #    "-" +
-        #    obj["level"] +
-        #    ".png"
-        #).content          
+        image = urequests.get(
+            url="https://blockchaingandalf.com/fellaz/z" +
+            str(r) + 
+            ".png"
+        ).content   
+
+        front = urequests.get(
+            url="https://blockchaingandalf.com/fellaz/f" +
+            str(r) + 
+            ".png"
+        ).content         
 
         tft.fill(s3lcd.BLACK)
         tft.rect(0,0,170,170,0x1f06)
         tft.rect(1,1,168,168,0x4349)
 
-        # center_scr(obj["name"], 0x07e4, s3lcd.BLACK, 4)
-        center_scr("TEST", 0x07e4, s3lcd.BLACK, 4)
+        center_scr(obj["name"], 0x07e4, s3lcd.BLACK, 4)
 
-        #left_scr(obj["attributes"][1]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 22)
-        #left_scr(obj["attributes"][1]["value"], 0x4c6c, s3lcd.BLACK, 32)
+        left_scr(obj["attributes"][1]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 22)
+        left_scr(obj["attributes"][1]["value"], 0x4c6c, s3lcd.BLACK, 32)
 
-        #left_scr(obj["attributes"][3]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 46)
-        #left_scr(obj["attributes"][3]["value"], 0x4c6c, s3lcd.BLACK, 56)
+        left_scr(obj["attributes"][3]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 46)
+        left_scr(obj["attributes"][3]["value"], 0x4c6c, s3lcd.BLACK, 56)
 
-        #left_scr(obj["attributes"][5]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 70)
-        #left_scr(obj["attributes"][5]["value"], 0x4c6c, s3lcd.BLACK, 80)
+        left_scr(obj["attributes"][5]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 70)
+        left_scr(obj["attributes"][5]["value"], 0x4c6c, s3lcd.BLACK, 80)
 
-        #left_scr(obj["attributes"][7]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 94)
-        #left_scr(obj["attributes"][7]["value"], 0x4c6c, s3lcd.BLACK, 104)
+        left_scr(obj["attributes"][7]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 94)
+        left_scr(obj["attributes"][7]["value"], 0x4c6c, s3lcd.BLACK, 104)
 
-        #left_scr(obj["attributes"][9]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 118)
-        #left_scr(obj["attributes"][9]["value"], 0x4c6c, s3lcd.BLACK, 128)
+        left_scr(obj["attributes"][9]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 118)
+        left_scr(obj["attributes"][9]["value"], 0x4c6c, s3lcd.BLACK, 128)
 
-        #left_scr(obj["attributes"][12]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 142)
-        #left_scr(str(obj["attributes"][12]["value"]), 0x4c6c, s3lcd.BLACK, 152)
+        left_scr(obj["attributes"][12]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 142)
+        left_scr(str(obj["attributes"][12]["value"]), 0x4c6c, s3lcd.BLACK, 152)
 
-        # tft.png(image, 2, 2)
+        tft.png(image, 2, 2)
         tft.show()
-        time.sleep(6)
-        # button_sleep(6, image, front)
+        button_sleep(6, image, front)
 
 except Exception as ex:
     error = str(type(ex))

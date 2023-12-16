@@ -68,3 +68,7 @@ To make a build, run `cd ~/orthoverse-s3/build/micropython/ports/esp32` and then
 
 `make USER_C_MODULES=~/orthoverse-s3/build/s3lcd/src/micropython.cmake FROZEN_MANIFEST="" FROZEN_MPY_DIR=$UPYDIR/modules BOARD=GENERIC_S3_SPIRAM_OCT`
 
+## Flashing firmware.bin
+
+The instructions for flashing the `firmware.bin` file to your device are [here](https://medium.com/@kf106/a-deadfellaz-device-for-halloween-051fc5832ace)
+

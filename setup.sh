@@ -32,15 +32,4 @@ sed -i 's/8MB=y/8MB=/' ./boards/GENERIC_S3_SPIRAM_OCT/sdkconfig.board
 sed -i 's/16MB=/16MB=y/' ./boards/GENERIC_S3_SPIRAM_OCT/sdkconfig.board
 sed -i 's/8MiB/16MiB/' ./boards/GENERIC_S3_SPIRAM_OCT/sdkconfig.board
 
-# perform a test build with the current configuration
-make USER_C_MODULES=./build/s3lcd/src/micropython.cmake FROZEN_MANIFEST="" FROZEN_MPY_DIR=$UPYDIR/modules BOARD=GENERIC_S3_SPIRAM_OCT
-
-# if everything went well, you should now see the following lines:
-
-# Project build complete. To flash, run this command:
-# /root/.espressif/python_env/idf4.4_py3.10_env/bin/python ../../../esp-idf/components/esptool_py/esptool/esptool.py -p (PORT) -b 460800 --before default_reset --after no_reset --chip esp32s3  write_flash --flash_mode dio --flash_size detect --flash_freq 80m 0x0 build-GENERIC_S3_SPIRAM_OCT/bootloader/bootloader.bin 0x8000 build-GENERIC_S3_SPIRAM_OCT/partition_table/partition-table.bin 0x10000 build-GENERIC_S3_SPIRAM_OCT/micropython.bin
-# or run 'idf.py -p (PORT) flash'
-# bootloader  @0x000000    18784  (   13984 remaining)
-# partitions  @0x008000     3072  (    1024 remaining)
-# application @0x010000  1502112  (  529504 remaining)
-# total                  1567648
+# build.sh should now build the firmware

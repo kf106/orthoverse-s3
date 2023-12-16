@@ -4,10 +4,19 @@
 
 startpath=$(pwd)
 
-cd ./build/micropython/ports/esp32
+# initialize idf
+cd $startpath/build/esp-idf
+source export.sh
+
+# got to micropython build folder
+cd $startpath/build/micropython/ports/esp32
+
+#copy over modules
+rm ./modules/*
+cp $startpath/modules/* ./modules/
 
 # run build
-make USER_C_MODULES=$startpath/build/s3lcd/src/micropython.cmake FROZEN_MANIFEST="" FROZEN_MPY_DIR=$startpath/modules BOARD=GENERIC_S3_SPIRAM_OCT
+make USER_C_MODULES=$startpath/build/s3lcd/src/micropython.cmake FROZEN_MANIFEST="" FROZEN_MPY_DIR=$UPYDIR/modules BOARD=GENERIC_S3_SPIRAM_OCT
 
 # copy result to firmware folder if build was successful
 
