@@ -1,7 +1,10 @@
 import vga1_8x8 as small
+import vga1_8x16 as medium
+import vga1_bold_16x32 as large
 import tft_config
 import tft_buttons
 import s3lcd
+import machine
 
 import network
 import socket
@@ -15,7 +18,12 @@ import random
 tft = tft_config.config(tft_config.WIDE)
 tft.init()
 
+from machine import deepsleep
+import esp32
 buttons = tft_buttons.Buttons()
+
+esp32.wake_on_ext0(pin = buttons.right, level = esp32.WAKEUP_ALL_LOW)
+
 messages = []
 
 #############################################################################
@@ -41,15 +49,15 @@ def print_scr(text, fg, bg):
             )        
     tft.show()
 
-print_scr("Welcome to DeadFellaz ESP32", s3lcd.WHITE, s3lcd.BLACK)
+print_scr("Welcome to Orthoverse ESP32", s3lcd.WHITE, s3lcd.BLACK)
 
 
 
 
 print_scr("Checking WiFi connectivity...", s3lcd.WHITE, s3lcd.BLACK)
 
-ap_ssid = "DeadFellaz"
-ap_password = "undeadhorde"
+ap_ssid = "orthoverse"
+ap_password = "orthoverse"
 ap_authmode = 3  # WPA2-PSK
 
 NETWORK_PROFILES = 'wifi.dat'
@@ -340,7 +348,7 @@ if wlan is None:
         pass  # you shall not pass :D
 
 # Main Code goes here, wlan is a working network.WLAN(STA_IF) instance.
-print_scr("Connected succesfully.", s3lcd.WHITE, s3lcd.BLUE)
+print_scr("Connected succesfully to WiFi.", s3lcd.WHITE, s3lcd.BLUE)
 time.sleep(1)
 
 ###################################
@@ -350,9 +358,9 @@ time.sleep(1)
 def center_scr(text, fg, bg, height):
     length = 1 if isinstance(text, int) else len(text)
     tft.text(
-        small,
+        large,
         text,
-        170 + (150 // 2 - length // 2 * small.WIDTH),
+        160 - (length * large.WIDTH // 2),
         height,
         fg,
         bg
@@ -363,84 +371,105 @@ def left_scr(text, fg, bg, height):
     tft.text(
         small,
         text,
-        178,
+        8,
         height,
         fg,
         bg
     )
 
+def frame(color):
+    tft.fill(s3lcd.BLACK)
+    tft.fill_rect(1, 16, 318, 8, color)
+    tft.rect(1, 24, 318, 145, color)
 
 b = 0
+d = 0
 
-def button_sleep(pause, image, front):
+def button_sleep(pause, image, obj, reveals):
+    global b
+    global d
     for i in range(0,pause * 20):
-        global b
         if (buttons.right and buttons.right.value() == 0) and b == 0:
+            # button pressed
             b = 1
-            tft.png(front, 2, 2)
-            tft.show()
+            d = (d + 1) % 2
         elif (buttons.right and buttons.right.value() == 1) and b == 1:
+            # button released
             b = 0
-            tft.png(image, 2, 2)
-            tft.show()
+
+        if (buttons.left and buttons.left.value() == 0):
+            deepsleep()
+
+        frame(0x9094)
+
+        if d == 0:
+            tft.png(image, 2, 25)
+            center_scr(obj["name"], 0x067f, 0x9094, 4)
+        else:
+            left_scr("Level:", 0x067f, s3lcd.BLACK, 32)
+            left_scr(" " + str(obj["level"] % 8), 0x053a, s3lcd.BLACK, 42)
+
+            left_scr("Realm:", 0x067f, s3lcd.BLACK, 58)
+            if obj["level"] < 8:
+                left_scr(" Fantasy", 0x053a, s3lcd.BLACK, 68)
+            else:
+                left_scr(" Futuristic", 0x053a, s3lcd.BLACK, 68)
+
+            left_scr("Coordinates:", 0x067f, s3lcd.BLACK, 84)
+            left_scr(" x: " + str(obj["x"]) + ", y: " + str(obj["y"]), 0x053a, s3lcd.BLACK, 94)
+
+            left_scr("TokenID:", 0x067f, s3lcd.BLACK, 110)
+            left_scr(" " + obj["tokenId"][:6] + "..." + obj["tokenId"][-4:], 0x053a, s3lcd.BLACK, 120)
+
+            left_scr("Total revealed:", 0x067f, s3lcd.BLACK, 136)
+            left_scr(" " + reveals, 0x053a, s3lcd.BLACK, 146)
+           
+            center_scr(obj["name"], 0x067f, 0x9094, 4)
+
+        tft.show()
         time.sleep(0.05)
+
+phrases = json.loads( urequests.get(
+    url="https://blockchaingandalf.com/api/motdArray"
+).text)
+
+void = urequests.get(
+    url="https://blockchaingandalf.com/void.png"
+).content
 
 try:
     while True:
-        r = random.randint(1,10000)
+
+        r = random.randint(0,len(phrases) - 1)
+        frame(0x8C71)
+        tft.png(void, 2, 25)
+        center_scr(phrases[r], 0xffff, 0x8C71, 4)
+        tft.show()
 
         metadata = urequests.get(
-            url="https://blockchaingandalf.com/fellaz/" +
-            str(r) + 
-            ".json"
+            url="https://blockchaingandalf.com/api/smallJSON"
         ).text
         obj = json.loads(metadata)
 
         image = urequests.get(
-            url="https://blockchaingandalf.com/fellaz/z" +
-            str(r) + 
+            url="https://blockchaingandalf.com/api/smallLand?img=" +
+            obj["tokenId"][2:] + 
+            "-" +
+            str(obj["level"]) +
             ".png"
-        ).content   
+        ).content
 
-        front = urequests.get(
-            url="https://blockchaingandalf.com/fellaz/f" +
-            str(r) + 
-            ".png"
-        ).content         
+        reveals = urequests.get(
+            url="https://orthoverse.io/api/counter/revealed"
+        ).text
 
-        tft.fill(s3lcd.BLACK)
-        tft.rect(0,0,170,170,0x1f06)
-        tft.rect(1,1,168,168,0x4349)
-
-        center_scr(obj["name"], 0x07e4, s3lcd.BLACK, 4)
-
-        left_scr(obj["attributes"][1]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 22)
-        left_scr(obj["attributes"][1]["value"], 0x4c6c, s3lcd.BLACK, 32)
-
-        left_scr(obj["attributes"][3]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 46)
-        left_scr(obj["attributes"][3]["value"], 0x4c6c, s3lcd.BLACK, 56)
-
-        left_scr(obj["attributes"][5]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 70)
-        left_scr(obj["attributes"][5]["value"], 0x4c6c, s3lcd.BLACK, 80)
-
-        left_scr(obj["attributes"][7]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 94)
-        left_scr(obj["attributes"][7]["value"], 0x4c6c, s3lcd.BLACK, 104)
-
-        left_scr(obj["attributes"][9]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 118)
-        left_scr(obj["attributes"][9]["value"], 0x4c6c, s3lcd.BLACK, 128)
-
-        left_scr(obj["attributes"][12]["trait_type"] + ":", 0x76cf, s3lcd.BLACK, 142)
-        left_scr(str(obj["attributes"][12]["value"]), 0x4c6c, s3lcd.BLACK, 152)
-
-        tft.png(image, 2, 2)
-        tft.show()
-        button_sleep(6, image, front)
+        button_sleep(6, image, obj, reveals)
 
 except Exception as ex:
     error = str(type(ex))
     # while (len(error) % 38 != 0):
     #    error = error + " "
-    print_scr("Error on count " + str(r), s3lcd.BLACK, s3lcd.RED)
+    print_scr("Error")
     print_scr(error, s3lcd.WHITE, s3lcd.RED)
     print_scr(str(ex.errno))
     #for i in range(0, len(error) // 38):
